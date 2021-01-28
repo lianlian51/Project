@@ -71,7 +71,17 @@ int main()
       Json::Value resp_json;
       Compiler::CompileAndRun(req_json, &resp_json);
 
+      // 获得的结果都在resp_json中
+      std::string errorno = resp_json["errorno"].asString();
+      std::string case_reult = resp_json["stdout"].asString();
+      std::string reason = resp_json["reason"].asString();
+
+      std::string html;
+      OjView::DrawCaseResult(errorno, case_reult, reason, &html);
+
+      resp.set_content(html, "text/html");
       });
+  LOG(INFO, "listen_port: ") << "17878" << std::endl;
 
   svr.listen("0.0.0.0", 17878);
   return 0;
