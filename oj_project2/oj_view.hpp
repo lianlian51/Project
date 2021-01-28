@@ -49,4 +49,17 @@ class OjView
       // 4.渲染
       tl->Expand(html, &dict);
     }
+
+
+    static void DrawCaseResult(const std::string errorno, const std::string q_result, const std::string reason, std::string* html)
+    {
+      ctemplate::TemplateDictionary dict("question"); 
+      dict.SetValue("errorno", errorno);
+      dict.SetValue("compile_result", reason);
+      dict.SetValue("case_result", q_result);
+
+      ctemplate::Template* tl = ctemplate::Template::GetTemplate("./template/case_result.html", ctemplate::DO_NOT_STRIP);
+
+      tl->Expand(html, &dict);
+    }
 };
