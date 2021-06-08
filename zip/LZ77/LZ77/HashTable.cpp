@@ -46,3 +46,24 @@ ush HashTable::GetNext(ush& matchHead)
 {
 	return _prev[matchHead & HASH_MASK];
 }
+
+// 当先行缓冲区小于最小的缓冲区时，左窗数据会被丢弃
+// 所以此时需要更新哈希表中保存的下标
+void HashTable::UpdateHashTable()
+{
+	for (ush i = 0; i < HASH_SIZE; ++i)
+	{
+		if (_head[i] <= WSIZE)
+			_head[i] = 0;
+		else
+			_head[i] -= WSIZE;
+	}
+
+	for (ush i = 0; i < HASH_SIZE; ++i)
+	{
+		if (_prev[i] <= WSIZE)
+			_prev[i] = 0;
+		else
+			_prev[i] -= WSIZE;
+	}
+}

@@ -8,7 +8,7 @@ LZ77::LZ77()
 
 LZ77::~LZ77()
 {
-	delete _pWin;
+	delete[] _pWin;
 	_pWin = nullptr;
 }
 
@@ -26,7 +26,7 @@ void LZ77::CompressLZ77(const std::string& filePath)
 	fseek(fIn, 0, SEEK_END);
 	ulg fileSize = ftell(fIn);
 	fseek(fIn, 0, SEEK_SET);
-	if (fileSize < MIN_MATCH)
+	if (fileSize <= MIN_MATCH)
 	{
 		std::cout << "文件太小，不压缩" << std::endl;
 		fclose(fIn);
@@ -38,7 +38,7 @@ void LZ77::CompressLZ77(const std::string& filePath)
 
 	ush hashAddr = 0;
 	ush matchHead = 0;
-	for (int i = 0; i < MIN_MATCH - 1; ++i)
+	for (ush i = 0; i < MIN_MATCH - 1; ++i)
 	{
 		_ht.Insert(hashAddr, _pWin[i], i, matchHead);
 	}
@@ -49,30 +49,33 @@ void LZ77::CompressLZ77(const std::string& filePath)
 
 
 	ush start = 0;
-	ush curMatchLength = 0;
-	ush curMatchDist = 0;
 	
 	uch ch = 0;
 	uch bitCount = 0;
 
 	while (lookahead)
 	{
+		ush curMatchLength = 0;
+		ush curMatchDist = 0;
 		// 4.将三个字节计算出来的哈希地址插入到哈希桶中
 		// 如果匹配链的头是0的话，那么这三个字节就是第一次出现，则写入到压缩文件中
 		_ht.Insert(hashAddr, _pWin[start + 2], start, matchHead);
-		if (0 == matchHead)
+
+		if (matchHead)
+		{
+			// 找到最长的匹配
+			curMatchLength = LongestMatch(matchHead, start, curMatchDist);
+		}
+		if (curMatchLength < MIN_MATCH)
 		{
 			fputc(_pWin[start], fOut);
 			start++;
-			lookahead -= 1;
+			lookahead--;
 
 			WriteFlag(fFlag, false, ch, bitCount);
 		}
 		else
 		{
-			// 找到最长的匹配
-			curMatchLength = LongestMatch(matchHead, start, curMatchDist);
-
 			// 将<长度，距离>写入到文件中
 			fputc(curMatchLength - 3, fOut);
 			fwrite(&curMatchDist, 2, 1, fOut);
@@ -91,7 +94,11 @@ void LZ77::CompressLZ77(const std::string& filePath)
 			}
 			++start;
 		}
-
+		
+		if (lookahead <= MIN_LOOKAHEAD)
+		{
+			FileData(fIn, lookahead, start);
+		}
 	}
 
 	if (bitCount > 0 && bitCount < 8)
@@ -102,16 +109,33 @@ void LZ77::CompressLZ77(const std::string& filePath)
 
 
 	fclose(fIn);
+	fclose(fFlag);
 
 	MergeFile(fOut, fileSize);
 	fclose(fOut);
-	fclose(fFlag);
+}
+
+void LZ77::FileData(FILE* fIn, ulg& lookahead, ush& start)
+{
+	if (start > MAX_DIST)
+	{
+		// 将数据从右窗搬移到左窗
+		memcpy(_pWin, _pWin + WSIZE, WSIZE);
+		start -= WSIZE;
+
+		// 更新哈希表
+		_ht.UpdateHashTable();
+
+		// 给右窗补充数据
+		if (!feof(fIn))
+			lookahead += fread(_pWin + WSIZE, 1, WSIZE, fIn);
+	}
 }
 
 ush LZ77::LongestMatch(ush matchHead, ush start, ush& curMatchDist)
 {
-	int maxLength = 0;
-	
+	ush maxLength = 0;
+	ush limit = start > MAX_DIST ? start - MAX_DIST : 0;
 	// 防止成环
 	uch maxMatchCount = 255;
 	do
@@ -120,10 +144,10 @@ ush LZ77::LongestMatch(ush matchHead, ush start, ush& curMatchDist)
 		uch* pEnd = pScan + MAX_MATCH;
 		uch* pStart = _pWin + start;
 
-		uch curLength = 0;
-		uch curDist = 0;
+		ush curLength = 0;
+		ush curDist = 0;
 
-		while (pScan < pStart && *pScan == *pStart)
+		while (pScan < pEnd && *pScan == *pStart)
 		{
 			++pScan;
 			++pStart;
@@ -138,7 +162,7 @@ ush LZ77::LongestMatch(ush matchHead, ush start, ush& curMatchDist)
 			curMatchDist = curDist;
 		}
 
-	} while ((matchHead = _ht.GetNext(matchHead)) && maxMatchCount--);
+	} while (((matchHead = _ht.GetNext(matchHead)) > limit) && maxMatchCount--);
 
 	return maxLength;
 }
@@ -164,6 +188,11 @@ void LZ77::MergeFile(FILE* fOut, ulg fileSize)
 {
 	FILE* fFlag = fopen("temp.txt", "rb");
 	assert(fFlag);
+	//if (fFlag == nullptr)
+	//{
+	//	std::cout << "打开文件失败" << std::endl;
+	//	return;
+	//}
 
 	uch readBuffer[1024];
 	size_t flagSize = 0;
@@ -183,3 +212,88 @@ void LZ77::MergeFile(FILE* fOut, ulg fileSize)
 
 	remove("temp.txt");
 }
+
+void LZ77::UNCompressLZ77(const std::string& filePath)
+{
+	// 1.打开文件
+	FILE* fIn = fopen(filePath.c_str(), "rb");
+	if (nullptr == fIn)
+	{
+		std::cout << "待解压的文件出错" << std::endl;
+		//fclose(fIn);
+		return;
+	}
+
+	// 2.读取源文件大小和标记大小
+	fseek(fIn, 0 - sizeof(ulg), SEEK_END);
+	ulg fileSize = 0;
+	fread(&fileSize, sizeof(fileSize), 1, fIn);
+
+	size_t flagSize = 0;
+	fseek(fIn, 0 - sizeof(fileSize)-sizeof(flagSize), SEEK_END);
+	fread(&flagSize, sizeof(flagSize), 1, fIn); // 上面的temp文件没关闭，导致读取的内容为空
+
+	fseek(fIn, 0, SEEK_SET);
+
+	// fFlag 读取标记，fIn读取源文件，fOut将读取的内容写到222中
+	FILE* fFlag = fopen(filePath.c_str(), "rb");
+	fseek(fFlag, 0 - sizeof(fileSize)-sizeof(flagSize)-flagSize, SEEK_END);
+
+	FILE* fOut = fopen("222.txt", "wb");
+
+	FILE* fRead = fopen("222.txt", "rb");
+
+	size_t i = 0;
+	uch ch = 0;
+	uch bitCount = 0;
+	uch chData = 0;
+	ulg compressCount = 0;
+	while (compressCount < fileSize)
+	{
+		if (bitCount == 0)
+		{
+			ch = fgetc(fFlag);
+			bitCount = 8;
+			++i;
+		}
+
+		// 检测该比特位是0还是1
+		if (ch & 0x80)
+		{
+			// 长度距离对
+			ush matchLength = fgetc(fIn) + 3;
+			ush matchDist = 0;
+
+			fread(&matchDist, sizeof(matchDist), 1, fIn);
+
+			fflush(fOut);
+
+			fseek(fRead, 0 - matchDist, SEEK_END);
+			compressCount += matchLength;
+
+			while (matchLength)
+			{
+				chData = fgetc(fRead);
+				fputc(chData, fOut);
+				fflush(fOut);
+				matchLength--;
+			}
+		}
+		else
+		{
+			// 原字符
+			chData = fgetc(fIn);
+			fputc(chData, fOut);
+			compressCount++;
+		}
+
+		bitCount--;
+		ch <<= 1;
+	}
+
+	fclose(fIn);
+	fclose(fFlag);
+	fclose(fOut);
+	fclose(fRead); // 如果fRead是fIn的一份拷贝，则fIn没有打开，不用关闭
+}
+

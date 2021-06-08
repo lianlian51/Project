@@ -11,6 +11,7 @@ public:
 	void Insert(ush& hashaddr, uch ch, ush pos, ush& matchHead);
 
 	ush GetNext(ush& matchHead);
+	void UpdateHashTable();
 private:
 	void HashFunc(ush& hashAddr, uch ch);
 	ush H_SHIFT();
