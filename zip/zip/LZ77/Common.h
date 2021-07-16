@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <vector>
+using namespace std;
 #include <assert.h>
 
 typedef unsigned char uch;
