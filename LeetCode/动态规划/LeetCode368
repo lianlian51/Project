@@ -1,0 +1,40 @@
+class Solution {
+public:
+    vector<int> largestDivisibleSubset(vector<int>& nums) {
+        // 如果整数 a 是整除子集 S的最小整数 b 的约数，那么可以将 a 添加到 S 中得到一个更大的整除子集；
+
+        // 如果整数 c 是整除子集 S 的最大整数 dd 的倍数，那么可以将 c 添加到 S中得到一个更大的整除子集。
+        int n = nums.size();
+        sort(nums.begin(), nums.end()); 
+        vector<int> dp(n, 1);
+        int maxSize = 1;
+        int maxVal = -1; // dp[0];
+        // 动态规划找出最大子集个数和最大子集中的最大整数
+        for(int i = 1; i < n; ++i){
+            for(int j = 0; j < i; j++){
+                if(nums[i] % nums[j] == 0){
+                    dp[i] = max(dp[i], dp[j] + 1);
+                }
+            }
+            if(dp[i] > maxSize){
+                maxSize = dp[i];
+                maxVal = nums[i];
+            }
+        }
+
+        // 倒序获得最大子集
+        vector<int> res;
+        if(maxSize == 1){
+            res.push_back(nums[0]);
+            return res;
+        }
+        for(int i = n - 1; i >= 0 && maxSize > 0; --i){
+            if(maxSize == dp[i] && maxVal % nums[i] == 0){
+                res.push_back(nums[i]);
+                maxVal = nums[i];
+                --maxSize;
+            }
+        }
+        return res;
+    }
+};

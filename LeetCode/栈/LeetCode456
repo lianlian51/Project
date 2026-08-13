@@ -1,0 +1,19 @@
+class Solution {
+public:
+    bool find132pattern(vector<int>& nums) {
+        int n = nums.size();
+        stack<int> s;  // 栈中维护的是一个递减序列
+        int k = INT_MIN; // 记录出栈最大的值
+        for(int i = n -1; i >= 0; --i){
+            if(nums[i] < k){
+                return true;
+            }
+            while(!s.empty() && nums[i] > s.top()){
+                k = max(k, s.top()); // 此时已经满足32模式，让2出栈并记录，就是找小于2的情况，如果有则返回true(模式2的值是k)
+                s.pop();
+            }
+            s.push(nums[i]);
+        }
+        return false;
+    }
+};

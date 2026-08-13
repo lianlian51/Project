@@ -1,0 +1,41 @@
+class Solution {
+public:
+    string fractionToDecimal(int numerator, int denominator) {
+        // 分子分母为0
+        if(numerator == 0){
+            return "0";
+        }
+        if(denominator == 0){
+            return "";
+        }
+        // 防止溢出
+        long long num = static_cast<long long>(numerator);
+        long long denom = static_cast<long long>(denominator);
+
+        // 正负号
+        string res = "";
+        if((num < 0) ^ (denom < 0)) res.push_back('-');
+        num = llabs(num), denom = llabs(denom);
+
+        res.append(to_string(num/denom));
+
+        num %= denom;
+        if(num == 0) return res;
+        // .处理
+        res.push_back('.');
+        unordered_map<int, int> record;  // 防止多个数字的循环，那么就要给多个数字加索引
+        int index = res.size() - 1; // . 的位置，如果有循环，就要选择插入的位置
+        while(num && record.count(num) == 0)
+        {
+            record[num] = ++index;
+            num *= 10;  // 验算补0
+            res += to_string(num/denom);
+            num %= denom;
+        }
+        if(record.count(num) == 1){
+            res.insert(record[num], "("); // 在记录的位置插入
+            res.push_back(')');
+        }
+        return res;
+    }
+};

@@ -1,0 +1,492 @@
+//class Solution {
+//public:
+//	bool find132pattern(vector<int>& nums) {
+//		int n = nums.size();
+//		stack<int> s;
+//		int k = INT_MIN; // 记录出栈最大的值
+//		for (int i = n - 1; i >= 0; --i){
+//			if (nums[i] < k){
+//				return true;
+//			}
+//			while (!s.empty() && nums[i] > s.top()){
+//				k = max(k, s.top()); // 此时已经满足32模式，让2出栈并记录，就是找小于2的情况，如果有则返回true
+//				s.pop();
+//			}
+//			s.push(nums[i]);
+//		}
+//		return false;
+//	}
+//};
+
+
+//#include <iostream>
+//using namespace std;
+//#include <string>
+//#include <vector>
+//
+//int main()
+//{
+//	string s;
+//	cin >> s;
+//	vector<int> v;
+//	for (int i = 0; i < s.size(); ++i){
+//		if (s[i] >= '0' && s[i] <= '9'){
+//			int t = 0;
+//			while (s[i] >= '0' && s[i] <= '9'){
+//				t = t * 10 + (s[i] - '0');
+//				++i;
+//			}
+//			v.push_back(t);
+//		}
+//	}
+//
+//	int i = 0, j = v.size() - 1;
+//	int p1 = 0, p2 = 0;
+//	while (i < j){
+//		if (v[i] > v[j]){
+//			p1 += v[i++];
+//		}
+//		else {
+//			p1 += v[j--];
+//		}
+//		if (v[i] > v[j]){
+//			p2 += v[i++];
+//		}
+//		else {
+//			p2 += v[j--];
+//		}
+//	}
+//	int p = (p1 > p2) ? p1 : p2;
+//	cout << p << endl;
+//
+//	return 0;
+//}
+
+
+//#include <iostream>
+//using namespace std;
+//#include <string>
+//#include <vector>
+//
+//bool cmp(string s1, string s2)
+//{
+//	if (s1.size() == 1 && s1[0] == '*'){
+//		return true;
+//	}
+//	int n1 = s1.size();
+//	if (s1[0] == '*'){
+//		int i = s1.size() - 1;
+//		int j = s2.size() - 1;
+//		while (i > 0){
+//			if (s1[i] != s2[j]){
+//				return false;
+//			}
+//			--i, --j;
+//		}
+//		return true;
+//	}
+//	if (s1[n1 - 1] == '*'){
+//		int i = 0;
+//		int j = 0;
+//		while (i < n1 - 1){
+//			if (s1[i] != s2[j]){
+//				return false;
+//			}
+//			++i, ++j;
+//		}
+//		return true;
+//	}
+//
+//	int i = 0;
+//	int j = 0;
+//	int n2 = s2.size();
+//	while (i < n1 && j < n2){
+//		if (s1[i] != s2[j] && s1[i] != '*'){
+//			return false;
+//		}
+//		if (i > 0 && i < n1 - 1 && s1[i] == '*' && s1[i - 1] == '.' && s1[i + 1] == '.'){
+//			i += 2;
+//			while (s2[j] != '.'){
+//				++j;
+//			}
+//			++j;
+//		}
+//		++i, ++j;
+//	}
+//	return true;
+//}
+//
+//int main()
+//{
+//	string s;
+//	getline(cin, s);
+//	string mat = "";
+//	string temp = "";
+//	vector<string> v;
+//	bool f = true;
+//	for (int i = 0; i < s.size(); ++i){
+//		if (s[i] == ' ' && i + 1 < s.size() && s[i + 1] == '['){
+//			f = false;
+//			continue;
+//		}
+//		if (f){
+//			mat += s[i];
+//		}
+//		if (!f){
+//			temp += s[i];
+//		}
+//	}
+//	for (int i = 0; i < temp.size(); ++i){
+//		if (temp[i] == '\"'){
+//			string t = "";
+//			++i;
+//			while (temp[i] != '\"'){
+//				t += temp[i++];
+//			}
+//			bool f = cmp(mat, t);
+//			if (f){
+//				v.push_back(t);
+//			}
+//		}
+//	}
+//	for (auto &e : v){
+//		cout << e << " ";
+//	}
+//	cout << endl;
+//	return 0;
+//}
+
+
+//
+//#include <iostream>
+//using namespace std;
+//#include <string>
+//#include <vector>
+//#include <algorithm>
+//
+//int find(string s, int pos)
+//{
+//	int n = s.size();
+//	for (int i = pos + 1; i < n; ++i){
+//		if (s[i] == s[pos]){
+//			return i + 1;
+//		}
+//	}
+//	return -1;
+//}
+//
+//int rfind(string s, int pos)
+//{
+//	int n = s.size();
+//	for (int i = pos - 1; i >= 0; --i){
+//		if (s[i] == s[pos]){
+//			return i + 1;
+//		}
+//	}
+//	return -1;
+//}
+//
+//int main()
+//{
+//	string s;
+//	cin >> s;
+//	int n;
+//	cin >> n;
+//	vector<vector<char>> nums;
+//	for (int i = 0; i < n; ++i){
+//		char a, b;
+//		cin >> a >> b;
+//		vector<char> temp;
+//		temp.push_back(a);
+//		temp.push_back(b);
+//		nums.push_back(temp);
+//	}
+//
+//
+//	for (int i = 0; i < n; ++i){
+//		char a = nums[i][0];
+//		char b = nums[i][1];
+//		if (a == '1'){
+//			s += b;
+//		}
+//		else if (a == '2'){
+//			int pos = b - '0';
+//			int l = find(s, pos - 1);
+//			int r = rfind(s, pos - 1);
+//			if (l == -1 && r == -1){
+//				cout << -1 << endl;
+//			}
+//			else if (l == -1){
+//				cout << pos - r << endl;
+//			}
+//			else if (r == -1){
+//				cout << l - pos << endl;
+//			}
+//			else{
+//				int res = min(abs(l - pos), abs(r - pos));
+//				cout << res << endl;
+//			}
+//		}
+//	}
+//	return 0;
+//}
+//
+
+
+//#include <iostream>
+//using namespace std;
+//#include <string>
+//#include <stack>
+//
+//int main()
+//{
+//	string s;
+//	cin >> s;
+//	stack<char> stk;
+//	int ans = 1;
+//	int temp = 0;
+//	for (int i = 0; i < s.size(); ++i){
+//		if (s[i] == '('){
+//			if (i > 0 && s[i - 1] == '('){
+//				stk.push('1');
+//			}
+//			stk.push('(');
+//		}
+//		else if (s[i] == ')'){
+//			if (stk.top() == '('){
+//				if (i > 0 && s[i] == ')' && s[i - 1] == '(')
+//					temp += 2;
+//				stk.pop();
+//			}
+//			if (!stk.empty()){
+//				if (stk.top() == '1'){
+//					temp += 1;
+//					stk.pop();
+//				}
+//			}
+//			if (stk.empty()){
+//				ans *= temp;
+//				temp = 0;
+//			}
+//		}
+//	}
+//	cout << ans << endl;
+//	return 0;
+//}
+#include <iostream>
+using namespace std;
+
+#include <vector>
+//
+//
+//
+//void dfs(vector<vector<int>>& grid, vector<vector<int>>& vis, int i, int j)
+//{
+//	int m = grid.size();
+//	int n = grid[0].size();
+//	if (i < 0 || i >= m){
+//		return; // 处理越界问题
+//	}
+//	if (j < 0 || j >= n){
+//		return;
+//	}
+//
+//	// 如果此时grid为0呢？是不是不该访问该位置,还有
+//	if (vis[i][j] == 1){
+//		return; //访问过的
+//	}
+//
+//	if (grid[i][j] == 0){
+//		return;
+//	}
+//
+//	vis[i][j] = 1; // 将此处标记为一块的岛
+//	dfs(grid, vis, i + 1, j); // 找一起的岛
+//	dfs(grid, vis, i - 1, j);
+//	dfs(grid, vis, i, j + 1);
+//	dfs(grid, vis, i, j - 1);
+//}
+//
+//int numberOfIslands(vector<vector<int> >& grid) {
+//	// write code here
+//	int m = grid.size();
+//	int n = grid[0].size();
+//	vector<vector<int>> vis(m, vector<int>(n, 0));
+//	int count = 0; // 记录次数
+//	for (int i = 0; i < m; ++i){
+//		for (int j = 0; j < n; ++j){
+//			if (grid[i][j] == 1 && vis[i][j] != 1){
+//				count++;
+//				dfs(grid, vis, i, j);
+//			}
+//		}
+//	}
+//	return count;
+//}
+//
+//
+//int main()
+//{
+//	vector<vector<int>> t{ { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } };
+//	cout << numberOfIslands(t) << endl;
+//	return 0;
+//}
+
+//int t = k - 1;
+//while (t--){
+//	s.push(cur->val);
+//	cur = cur->next;
+//}
+//cur = prev;
+//while (!s.empty()){
+//	cur->val = s.top();
+//	s.pop();
+//	cur = cur->next;
+//}
+//prev = cur;
+
+
+ struct ListNode {
+	int val;
+	struct ListNode *next;
+	ListNode(int _val)
+		:val(_val)
+		, next(nullptr)
+	{}
+};
+
+#include <stack>
+
+struct ListNode* revertLinkList(struct ListNode* head, int k) {
+	// write code here
+	if (k == 1){
+		return head;
+	}
+	struct ListNode* cur = head;
+	struct ListNode* prev = head;
+	stack<ListNode*> s;
+
+	ListNode* ans = new ListNode(0);
+	ListNode* end = ans;
+
+	while (cur != nullptr){
+		int t0 = k;
+		while (t0-- && cur != nullptr){
+			s.push(cur);
+			cur = cur->next;
+		}
+		if (s.size() < k && s.size() != 0){
+			end->next = s.top();
+			s.pop();
+			while (!s.empty()){
+				ListNode* t = end->next;
+				s.top()->next = t;
+				end->next = s.top();
+				s.pop();
+			}
+			//while (end->next != nullptr){
+			//	end = end->next;
+			//}
+
+			break;
+		}
+		while (!s.empty()){
+			end->next = s.top();
+			s.pop();
+			end = end->next;
+		}
+		prev = cur;
+	}
+	//end->next = nullptr;
+	return ans->next;
+}
+
+int main()
+{
+	ListNode* n1 = new ListNode(1);
+	ListNode* n2 = new ListNode(2);
+	ListNode* n3 = new ListNode(3);
+	ListNode* n4 = new ListNode(4);
+	ListNode* n5 = new ListNode(5);
+	ListNode* n6 = new ListNode(6);
+	ListNode* n7 = new ListNode(7);
+	ListNode* n8 = new ListNode(8);
+	ListNode* n9 = new ListNode(9);
+	ListNode* n10 = new ListNode(10);
+	ListNode* n11 = new ListNode(11);
+	ListNode* n12 = new ListNode(12);
+	ListNode* n13 = new ListNode(13);
+	//ListNode* n = new ListNode(8);
+
+
+	n1->next = n2;
+	n2->next = n3;
+	n3->next = n4;
+	n4->next = n5;
+	n5->next = n6;
+	n6->next = n7;
+	n7->next = n8;
+	n8->next = n9;
+	n9->next = n10;
+	n10->next = n11;
+	n11->next = n12;
+	n12->next = n13;
+	//n8->next = n9;
+
+	ListNode* node = revertLinkList(n1, 5);
+	ListNode* cur = node;
+	while (cur != nullptr){
+		cout << cur->val << " ";
+		cur = cur->next;
+	}
+
+	return 0;
+}
+
+#include <string>
+//
+//int main()
+//{
+//	string s;
+//	vector<int> res;
+//	getline(cin, s);
+//	for (int i = 0; i < s.size(); ++i){
+//		if (s[i] >= '0' && s[i] <= '9'){
+//			int t = 0;
+//			while (s[i] >= '0' && s[i] <= '9'){
+//				t = t * 10 + (s[i] - '0');
+//				++i;
+//			}
+//			res.push_back(t);
+//		}
+//	}
+//	int n = res.size();
+//	int k;
+//	while (cin >> k)
+//	{
+//		int min, max;
+//		int i = 0, j = n - 1;
+//		while (i < n){
+//			if (res[i] == k){
+//				min = i;
+//				break;
+//			}
+//			i++;
+//		}
+//		while (j >= 0){
+//			if (res[j] == k){
+//				max = i;
+//				break;
+//			}
+//			j--;
+//		}
+//		if (i == n && j == -1){
+//			cout << -1 << "," << -1 << endl;
+//		}
+//		else {
+//			cout << i << "," << j << endl;
+//		}
+//	}
+//
+//	return 0;
+//}
