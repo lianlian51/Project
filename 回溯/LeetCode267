@@ -1,0 +1,49 @@
+class Solution {
+public:
+    vector<string> res;
+    unordered_map<char, int> map;
+
+    void dfs(string mid, int n)
+    {
+        if(mid.size() > n){
+            return;
+        }
+        if(mid.size() == n){
+            res.push_back(mid);
+        }
+        for(auto [c, freq] : map){
+            if(freq > 0){a
+                map[c] -= 2;
+                dfs(c + mid + c, n);
+                map[c] += 2;
+            }
+        }
+        return ;
+    }
+
+    vector<string> generatePalindromes(string s) {
+        int n = s.size();
+        for(auto & c : s){
+            map[c]++;
+        } 
+        int count = 0; // 奇数的个数
+        char ch;
+        for(auto [c, freq] : map){
+            if(freq % 2 == 1){
+                count++;
+                ch = c;
+                if(count > 1){
+                    return {};
+                }
+            }
+        }
+        string mid = "";
+        if(count == 1){
+            mid = ch;
+            map[ch]--; // 在map中去掉奇数
+        }
+
+        dfs(mid, n);
+        return res;
+    }
+};

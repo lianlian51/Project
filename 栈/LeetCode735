@@ -1,0 +1,30 @@
+class Solution {
+public:
+    vector<int> asteroidCollision(vector<int>& asteroids) {
+        vector<int> s;
+        for(auto& x : asteroids){
+            if(x > 0) s.push_back(x);
+            else if(x < 0){
+                bool f = true; // 是否保留
+                while(!s.empty() && s.back() > 0){
+                    if(s.back() > -x){
+                        f = false;
+                        break;
+                    }
+                    else if(s.back() < -x){ 
+                        s.pop_back();
+                    }
+                    else if(s.back() == -x){ // 行星撞毁
+                        s.pop_back();
+                        f = false;
+                        break;
+                    }
+                }
+                if(f){
+                    s.push_back(x);
+                }
+            }
+        }
+        return s;
+    }
+};

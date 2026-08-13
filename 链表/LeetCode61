@@ -1,0 +1,36 @@
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* rotateRight(ListNode* head, int k) {
+        if(k == 0 || head == nullptr || head->next == nullptr){
+            return head;
+        }
+        ListNode* cur = head;
+        int n = 1;
+        while(cur->next != nullptr){ // 这里是cur->next为了将这个链表练成环
+            cur = cur->next;
+            ++n;
+        }
+        int add = n - k % n; // 计算走的次数，如果add为0，那么就不需要走之后的步骤
+        if(add == 0){
+            return head;
+        }
+        cur->next = head;
+        cur = head;
+        while(--add){ // 这里少走一步，就是为了在断开的时候，将链表的末尾给成nullptr
+            cur = cur->next;
+        }
+        ListNode* ret = cur->next;
+        cur->next = nullptr;
+        return ret;
+    }
+};

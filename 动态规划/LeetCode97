@@ -1,0 +1,24 @@
+class Solution {
+public:
+    bool isInterleave(string s1, string s2, string s3) {
+        // 动态规划
+        int m = s1.size(), n = s2.size(), t = s3.size();
+        if(m + n != t){
+            return false;
+        }
+        vector<vector<int>> f(m + 1, vector<int>(n + 1, false)); // 这里不能采用bool类型，bool类型不支持|=
+        f[0][0] = true;
+        for(int i = 0; i <= m; ++i){
+            for(int j = 0; j <= n; ++j){
+                int p = i + j - 1; // 如果p==-1，那么就不会进入两个if
+                if(i > 0) {
+                    f[i][j] |= (f[i-1][j] && s1[i-1] == s3[p]); // 在f[i-1][j]为true基础上，如果此时的值相等，那么就|=当前位置的值。
+                }
+                if(j > 0){
+                    f[i][j] |= (f[i][j-1] && s2[j-1] == s3[p]); // 在f[i][j-1]位置为true
+                }
+            }
+        }
+        return f[m][n];
+    }
+};

@@ -1,0 +1,17 @@
+class Solution {
+public:
+    int lengthOfLIS(vector<int>& nums) {
+        // 动态规划
+        int n = nums.size();
+        vector<int> dp(n, 0);
+        for(int i = 0; i < n; ++i){
+            dp[i] = 1;
+            for(int j = 0; j < i; ++j){
+                if(nums[j] < nums[i]){
+                    dp[i] = max(dp[i], dp[j] + 1);
+                }
+            }
+        }
+        return *max_element(dp.begin(), dp.end()); // 返回数组不确定位置的最大值
+    }
+};

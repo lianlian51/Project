@@ -1,0 +1,39 @@
+class Solution {
+public:
+    int lengthLongestPath(string input) {
+        input.push_back('\n'); // 对于最后的一个文件或文件夹，需要额外的\n处理
+        vector<int> ans(100, 0);
+        int res = 0; // 返回最大长度
+        int curLevel = 0; // 层级
+        bool f = false;
+        int len = 0; // 当前字符串的长度
+        for(char ch : input){
+            if(ch == '\t'){
+                ++curLevel;
+            }
+            else if(ch == '\n'){
+                // 说明此时该计算长度了
+                ans[curLevel] = len; 
+                if(f){ // 计算文件的长度
+                    int maxLen = 0;
+                    for(int i = 0; i <= curLevel; ++i){
+                        maxLen += ans[i];
+                    }
+                    res = max(res, maxLen + curLevel); // 长度加上分隔符 /
+                }
+                // 需要更新参数
+                curLevel = 0;
+                len = 0;
+                f = false;
+            }
+            else {
+                if(ch == '.'){
+                    // 这是文件
+                    f = true;
+                }
+                ++len; // 每走一步+1
+            }
+        }
+        return res;
+    }
+};

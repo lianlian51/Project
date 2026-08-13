@@ -1,0 +1,30 @@
+class Solution {
+public:
+    string removeKdigits(string num, int k) {
+        // 模拟栈：单调栈+贪心
+        vector<char> stk;
+        // 将底层字符入stk
+        for(auto& dig : num){
+            while(stk.size() > 0 && stk.back() > dig && k){ // 当发现有数字小于stk的末尾，那么就出stk，将当前dig入stk，k表示出stk的次数
+                stk.pop_back();
+                k -= 1;
+            }
+            stk.push_back(dig);
+        }
+        // 如果此时的k还没为0，那么还要继续出stk
+        for(; k > 0; k--){
+            stk.pop_back();
+        }
+        string ans = "";
+        bool isZero = true;
+        for(auto & dig : stk){
+            // 处理前导零
+            if(isZero && dig == '0'){
+                continue;
+            }
+            isZero = false;
+            ans += dig;
+        }
+        return ans == "" ? "0" : ans;
+    }
+};

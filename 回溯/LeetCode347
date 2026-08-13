@@ -1,0 +1,28 @@
+class Solution {
+public:
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+        // 利用unordered_map计算出数字的个数
+        unordered_map<int, int> m;
+        for(auto e:nums)
+        {
+            m[e]++;
+        }
+
+        // 对m中的数字排序，保证降序排序
+        multimap<int, int , greater<int>> mm;
+        for(auto e:m)
+        {
+            mm.insert(make_pair(e.second, e.first));
+        }
+        // 将mm中已排序的数字返回最大的k个
+        vector<int> ret;
+        for(auto e: mm)
+        {
+            if(k == 0)
+                break;
+            ret.push_back(e.second);
+            k--;
+        }
+        return ret;
+    }
+};

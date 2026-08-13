@@ -1,0 +1,24 @@
+class Solution {
+public:
+    int nthSuperUglyNumber(int n, vector<int>& primes) {
+        int m = primes.size();
+        vector<int> dp(n + 1);
+        vector<int> points(m, 1);
+        dp[1] = 1;
+        for(int i = 2; i <= n; ++i){
+            vector<int> nums(m);
+            int MinNum = INT_MAX;
+            for(int j = 0; j < m; ++j){
+                nums[j] = dp[points[j]] * primes[j]; // 用dp中的值乘以primes中的，取得最小的值
+                MinNum = min(MinNum, nums[j]);
+            }
+            dp[i] = MinNum; // 没计算一次，给points中对应的位置加1，表示该位置已经乘过了
+            for(int j = 0; j < m; ++j){
+                if(MinNum == nums[j]){
+                    points[j]++;
+                }
+            }
+        } 
+        return dp[n];
+    }
+};
